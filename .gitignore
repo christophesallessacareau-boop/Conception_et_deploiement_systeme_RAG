@@ -1,0 +1,14 @@
+# Environnement virtuel
+env/
+venv/
+
+# Fichiers Python
+__pycache__/
+*.pyc
+
+# Config VS Code
+.vscode/
+
+# Données volumineuses
+data/
+datasets/
