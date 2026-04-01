@@ -10,9 +10,13 @@ import requests
 from datetime import datetime, timedelta, timezone
 
 from mistralai import Mistral
-print("OK import") # pour verification de l'import de mistral!!!!!!
+print("OK mistralai import") # pour verification de l'import de mistralai!!!!!!
 from langchain_community.vectorstores import FAISS
 from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_mistralai import ChatMistralAI
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+print ("imports OK")
 
 
 # Récupération de la clé API Mistral depuis le fichier .env:
@@ -60,6 +64,34 @@ evenements  = telecharger_evenements()
 
 # Générer les embeddings avec Mistral
 
+# Chunking:
+
+def chunker_texte(texte):
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=500,
+        chunk_overlap=50
+    )
+    return splitter.split_text(texte)
+
+
+def get_embedding(client, texte, retries=5): # limitation de débit fréquent avec Mistral AI=> retry auto
+    """Appelle l'API Mistral avec retry automatique en cas d'erreur (ex: 429)."""
+    for i in range(retries):
+        try:
+            response = client.embeddings.create(
+                model="mistral-embed",
+                inputs=[texte]
+            )
+            return response.data[0].embedding
+
+        except Exception as e:
+            print(f" Erreur API (tentative {i+1}) :", e)
+            time.sleep(2 * (i + 1))  # backoff (temporisation)
+
+    print(" Échec après plusieurs tentatives.")
+    return None
+
+
 def generer_embeddings(evenements):
     """Génère un vecteur (embedding) pour chaque description d'événement."""
  
@@ -75,28 +107,32 @@ def generer_embeddings(evenements):
         if not description:
             print(f"  Pas de description pour : {titre}")
             continue
+
+        chunks=chunker_texte(description)
          
-        # Appel à l'API Mistral pour générer l'embedding
-        reponse_mistral = client.embeddings.create(
-            model="mistral-embed",
-            inputs=[f"{titre}. {description}"],
-        )
-        vecteur = reponse_mistral.data[0].embedding
- 
+        for chunk in chunks:
+        # appel via fonction avec retry
+            texte = f"{titre}. {chunk}"
+
+            vecteur = get_embedding(client, texte)
+            if vecteur is None:
+                print(f" Embedding échoué pour : {titre}")
+                continue # on continue même si une requête échoue
+         
         # On stocke le résultat
-        resultats.append({
-            "titre":      titre,
-            "ville":      evenement.get("location_city", ""),
-            "date_debut": evenement.get("date_start", ""),
-            "description": description[:200],   # Aperçu de la description
-            "embedding":  vecteur,              # Vecteur de 1024 dimensions
-        })
+            resultats.append({
+                "titre":      titre,
+                "ville":      evenement.get("location_city", ""),
+                "date_debut": evenement.get("date_start", ""),
+                "description": description[:200],   # Aperçu de la description
+                "embedding":  vecteur,              # Vecteur de 1024 dimensions
+            })
  
-        print(f" {titre[:60]}")
-        print(f"  Ville : {evenement.get('location_city', '?')}")
-        print(f"  Vecteur : {len(vecteur)} dimensions — premiers chiffres : {vecteur[:4]}\n")
+            print(f" {titre[:60]}")
+            print(f"  Ville : {evenement.get('location_city', '?')}")
+            print(f"  Vecteur : {len(vecteur)} dimensions — premiers chiffres : {vecteur[:4]}\n")
  
-        time.sleep(0.3)  # pause pour ne pas surcharger l'API
+            time.sleep(1)  # pause pour limiter les appels à l'API
  
     return resultats
 
@@ -114,12 +150,13 @@ def sauvegarder(resultats):
     - Parquet : fichier complet avec les vecteurs"""
  
     # CSV — sans la colonne embedding
-    df_csv = resultats.drop(columns=["embedding"])
+    df = pd.DataFrame(resultats)
+    df_csv = df.drop(columns=["embedding"])
     df_csv.to_csv("evenements_occitanie.csv", index=False, encoding="utf-8-sig")
     print(" Fichier CSV sauvegardé: evenements_occitanie.csv")
  
     # Parquet — avec les embeddings (format binaire optimisé pour Python)
-    resultats.to_parquet("evenements_occitanie.parquet", index=False)
+    df.to_parquet("evenements_occitanie.parquet", index=False)
     print(" Fichier Parquet sauvegardé: evenements_occitanie.parquet")
     print('   df = pd.read_parquet("evenements_occitanie.parquet")')
 
