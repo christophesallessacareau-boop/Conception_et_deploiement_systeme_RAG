@@ -10,7 +10,7 @@ import requests
 from datetime import datetime, timedelta, timezone
 
 from mistralai import Mistral
-from mistralai.models.chat_completion import ChatMessage
+print("OK import") # pour verification de l'import de mistral!!!!!!
 from langchain_community.vectorstores import FAISS
 from langchain_community.embeddings import HuggingFaceEmbeddings
 
@@ -75,9 +75,9 @@ def generer_embeddings(evenements):
         if not description:
             print(f"  Pas de description pour : {titre}")
             continue
- 
+         
         # Appel à l'API Mistral pour générer l'embedding
-        reponse_mistral = client.embeddings(
+        reponse_mistral = client.embeddings.create(
             model="mistral-embed",
             inputs=[f"{titre}. {description}"],
         )
@@ -122,3 +122,5 @@ def sauvegarder(resultats):
     resultats.to_parquet("evenements_occitanie.parquet", index=False)
     print(" Fichier Parquet sauvegardé: evenements_occitanie.parquet")
     print('   df = pd.read_parquet("evenements_occitanie.parquet")')
+
+
