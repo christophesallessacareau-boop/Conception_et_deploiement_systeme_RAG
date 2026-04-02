@@ -9,14 +9,16 @@ import time
 import requests
 from datetime import datetime, timedelta, timezone
 
+import faiss
 from mistralai import Mistral
-print("OK mistralai import") # pour verification de l'import de mistralai!!!!!!
-from langchain_community.vectorstores import FAISS
+print("OK mistralai import") # pour verification de l'import de mistralai
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_mistralai import ChatMistralAI
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_core.documents import Document
 
 print ("imports OK")
+
 
 
 # Récupération de la clé API Mistral depuis le fichier .env:
@@ -25,6 +27,38 @@ load_dotenv()
 MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
 client = Mistral(api_key=MISTRAL_API_KEY)
 print("Clé chargée :", MISTRAL_API_KEY is not None)
+
+
+
+# convertir les données en index FAISS
+
+def construire_index_faiss(resultats):
+    """Construit un index FAISS + stocke les métadonnées séparément."""
+    
+    # Vecteurs
+    vectors = np.array([r["embedding"] for r in resultats]).astype("float32")
+    
+    dim = vectors.shape[1]
+
+    # Index FAISS
+    index = faiss.IndexFlatL2(dim)
+    index.add(vectors)
+
+    # Métadonnées
+    metadatas = [
+        {
+            "titre": r["titre"],
+            "ville": r["ville"],
+            "date": r["date_debut"],
+            "description": r["description"]
+        }
+        for r in resultats
+    ]
+
+    print(f" Index FAISS construit : {index.ntotal} vecteurs")
+    
+    return index, metadatas
+
 
 
 # Récupérer les événements via l'API OpenDataSoft
@@ -39,7 +73,7 @@ def telecharger_evenements():
     url = "https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/evenements-publics-openagenda/records"
     params = {
         "where": f"location_region='Occitanie' AND firstdate_end >= date'{il_y_a_un_an}'",
-        "limit": 100,           # pour 100 événements
+        "limit": 50,           # pour 50 événements
         "order_by": "firstdate_begin DESC", # trier par date décroissante
     }
  
@@ -62,9 +96,50 @@ def telecharger_evenements():
 evenements  = telecharger_evenements()
 
 
+# Analyse Exploratoire des données
+
+def analyser_evenements(evenements):
+    """
+    Transforme les événements en DataFrame:
+    - Combien d'événements ont une description ?
+    - Quelles colonnes sont souvent vides ?
+    - Aperçu des données
+    """
+
+    # Conversion en DataFrame pour analyse
+    df = pd.DataFrame(evenements)
+    
+    # Aperçu des colonnes utiles
+    colonnes_utiles = ["title_fr", "location_city", "location_region", "location_departement", "firstdate_begin", 
+                       "firstdate_end", "lastdate_begin", "lastdate_end", "description_fr", "location_name"]
+    colonnes_presentes = [c for c in colonnes_utiles if c in df.columns]
+    print(df[colonnes_presentes].head(5).to_string())
+
+    # données manquantes
+    taux_manquants = (df[colonnes_presentes].isnull().mean() * 100).round(1)
+    print(taux_manquants.to_string())
+
+    # zoom sur les descriptions (colonne la plus importante)
+    if "description_fr" in df.columns:
+        nb_avec = df["description_fr"].notna().sum()
+        nb_sans = df["description_fr"].isna().sum()
+        print(f"   - Avec description : {nb_avec}")
+        print(f"   - Sans description : {nb_sans}")
+
+    # On ne garde que les événements avec une description
+    nb_evenement = len(df)
+    df = df[df["description_fr"].notna()].reset_index(drop=True)
+    print(f"\n Après filtrage (avec description uniquement) : {len(df)} / {nb_evenement} événements\n")
+
+    return df
+
+df = analyser_evenements(evenements)
+
+
+
 # Générer les embeddings avec Mistral
 
-# Chunking:
+## Chunking:
 
 def chunker_texte(texte):
     splitter = RecursiveCharacterTextSplitter(
@@ -124,7 +199,7 @@ def generer_embeddings(evenements):
                 "titre":      titre,
                 "ville":      evenement.get("location_city", ""),
                 "date_debut": evenement.get("date_start", ""),
-                "description": description[:200],   # Aperçu de la description
+                "description": chunk, # plutôt que description[:200] pour garder le chunk entier
                 "embedding":  vecteur,              # Vecteur de 1024 dimensions
             })
  
@@ -138,8 +213,50 @@ def generer_embeddings(evenements):
 
 
 resultats   = generer_embeddings(evenements)
- 
 print(f"\nTerminé ! {len(resultats)} embeddings générés.")
+
+
+# Construction de l'index FAISS
+index, metadatas = construire_index_faiss(resultats)
+
+# Vérification que tout est bien indexé:
+print("Nombre de métadonnées :", len(metadatas))
+
+# Vérification que tout est bien indexé avec FAISS:
+print("Nombre de vecteurs :", index.ntotal)
+
+if index.ntotal == len(metadatas):
+    print(" Tout est bien aligné !")
+else:
+    print(" Problème : mismatch index / metadata")
+
+
+
+# Recherche sémantique
+
+def rechercher(index, metadatas, query_embedding, k=3):
+    import numpy as np
+
+    query_vector = np.array([query_embedding]).astype("float32")
+
+    distances, indices = index.search(query_vector, k)
+
+    results = []
+    for i in indices[0]:
+        results.append(metadatas[i])
+
+    return results
+
+# Exemple de recherche:
+query = "festival musique Toulouse"
+print(f"\nRecherche pour : '{query}'")
+query_embedding = get_embedding(client, query)
+
+results = rechercher(index, metadatas, query_embedding)
+
+for r in results:
+    print(r["titre"], "-", r["ville"])
+
 
 
 # Sauvegarder les résultats
