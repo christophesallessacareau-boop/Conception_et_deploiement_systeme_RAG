@@ -1,8 +1,9 @@
 
 import sys
-import os
+import os # acces aux variables d'environnement
 import pandas as pd
 import numpy as np
+import streamlit as st # interface UI
 
 from dotenv import load_dotenv
 import time
@@ -11,13 +12,13 @@ from datetime import datetime, timedelta, timezone
 
 import faiss
 from mistralai import Mistral
-print("OK mistralai import") # pour verification de l'import de mistralai
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_mistralai import ChatMistralAI
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
+from langchain_community.vectorstores import FAISS
 
-print ("imports OK")
+print ("imports réalisés")
 
 
 
@@ -69,10 +70,10 @@ def telecharger_evenements():
     # Date d'il y a 1 an (format attendu par l'API)
     il_y_a_un_an = (datetime.now(timezone.utc) - timedelta(days=365)).strftime("%Y-%m-%d")
  
-    # Paramètres de la requête
+    # Paramètres de la requête (localisation et date 1 an historique et à venir)
     url = "https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/evenements-publics-openagenda/records"
     params = {
-        "where": f"location_region='Occitanie' AND firstdate_end >= date'{il_y_a_un_an}'",
+        "where": f"location_region='Occitanie' AND firstdate_begin >= date'{il_y_a_un_an}'",
         "limit": 50,           # pour 50 événements
         "order_by": "firstdate_begin DESC", # trier par date décroissante
     }
@@ -98,7 +99,7 @@ evenements  = telecharger_evenements()
 
 # Analyse Exploratoire des données
 
-def analyser_evenements(evenements):
+def analyser_evenements(evenements, verbose=True):
     """
     Transforme les événements en DataFrame:
     - Combien d'événements ont une description ?
@@ -128,8 +129,10 @@ def analyser_evenements(evenements):
 
     # On ne garde que les événements avec une description
     nb_evenement = len(df)
-    df = df[df["description_fr"].notna()].reset_index(drop=True)
-    print(f"\n Après filtrage (avec description uniquement) : {len(df)} / {nb_evenement} événements\n")
+    if "description_fr" in df.columns:
+        df = df[df["description_fr"].notna()].reset_index(drop=True)
+    if verbose:
+        print(f"\n Après filtrage (avec description uniquement) : {len(df)} / {nb_evenement} événements\n")
 
     return df
 
@@ -198,8 +201,8 @@ def generer_embeddings(evenements):
             resultats.append({
                 "titre":      titre,
                 "ville":      evenement.get("location_city", ""),
-                "date_debut": evenement.get("date_start", ""),
-                "description": chunk, # plutôt que description[:200] pour garder le chunk entier
+                "date_debut": evenement.get("firstdate_begin", ""), # date_start n'existe pas
+                "description": chunk, # plutôt que description[:200] par ex pour garder le chunk entier
                 "embedding":  vecteur,              # Vecteur de 1024 dimensions
             })
  
@@ -219,24 +222,30 @@ print(f"\nTerminé ! {len(resultats)} embeddings générés.")
 # Construction de l'index FAISS
 index, metadatas = construire_index_faiss(resultats)
 
-# Vérification que tout est bien indexé:
+
+# Vérification que tout est bien indexé avec les métadonnées:
 print("Nombre de métadonnées :", len(metadatas))
 
 # Vérification que tout est bien indexé avec FAISS:
-print("Nombre de vecteurs :", index.ntotal)
+print("Nombre de vecteurs FAISS :", index.ntotal)
 
-if index.ntotal == len(metadatas):
-    print(" Tout est bien aligné !")
+# Vérification que tout est bien indexé avec les résultats (chunks):
+print("Nombre de résultats (chunks) :", len(resultats))
+
+if index.ntotal == len(metadatas)== len(resultats):
+    print(" Tous les événements sont bien indexés !")
 else:
-    print(" Problème : mismatch index / metadata")
+    print(" Problème : mismatch index / metadata / résultats (chunks) !")
+
+# Vérification (titre, ville, date de debut, descripion) de la première métadonnée
+print("\n Exemple de métadonnée :")
+print(metadatas[0])
 
 
 
 # Recherche sémantique
 
 def rechercher(index, metadatas, query_embedding, k=3):
-    import numpy as np
-
     query_vector = np.array([query_embedding]).astype("float32")
 
     distances, indices = index.search(query_vector, k)
@@ -247,13 +256,14 @@ def rechercher(index, metadatas, query_embedding, k=3):
 
     return results
 
-# Exemple de recherche:
-query = "festival musique Toulouse"
+# Exemple de recherche réel:
+query = "concert Toulouse"
 print(f"\nRecherche pour : '{query}'")
 query_embedding = get_embedding(client, query)
 
 results = rechercher(index, metadatas, query_embedding)
 
+print(f" Résultats pour '{query}':")
 for r in results:
     print(r["titre"], "-", r["ville"])
 
@@ -278,3 +288,100 @@ def sauvegarder(resultats):
     print('   df = pd.read_parquet("evenements_occitanie.parquet")')
 
 
+
+# LangChain attend un vectorstore avec une méthode de recherche
+# vectorstore compatible LongChain
+# on crée une classe pour notre index FAISS et les métadonnées pour l'utiliser dans LangChain:
+def construire_vectorstore_langchain(resultats):
+    documents = []
+    embeddings = []
+
+    for r in resultats:
+        documents.append(
+            Document(
+                page_content=r["description"],
+                metadata={
+                    "titre": r["titre"],
+                    "ville": r["ville"],
+                    "date": r["date_debut"],
+                }
+            )
+        )
+        embeddings.append(r["embedding"])
+
+    embeddings = np.array(embeddings).astype("float32")
+
+    # Fake embedding wrapper compatible LangChain
+    class FakeEmbeddings:
+        def embed_documents(self, texts):
+            return embeddings.tolist()
+
+        def embed_query(self, text):
+            return embeddings[0].tolist()
+
+    vectorstore = faiss.from_documents(documents, FakeEmbeddings())
+
+    print(f" Vectorstore prêt : {len(documents)} documents")
+    return vectorstore
+
+# creation du retriever
+def creer_retriever(vectorstore):
+    return vectorstore.as_retriever(search_kwargs={"k": 3})
+
+# Initialiser Mistral avec LangChain
+llm = ChatMistralAI(
+    api_key=MISTRAL_API_KEY,
+    model="mistral-small-latest",
+    temperature=0.3
+)
+
+# Construire la chaîne RAG
+def construire_chaine_rag(retriever, llm):
+    def rag_pipeline(question):
+        docs = retriever.get_relevant_documents(question)
+
+        contexte = "\n\n".join([doc.page_content for doc in docs])
+
+        prompt = f"""
+Tu es un assistant spécialisé dans les événements en Occitanie.
+
+Contexte :
+{contexte}
+
+Question :
+{question}
+
+Réponds de manière claire et utile, en proposant des événements pertinents.
+"""
+
+        response = llm.invoke(prompt)
+
+        return response.content, docs
+
+    return rag_pipeline
+
+# utilisation du chatbot:
+vectorstore = construire_vectorstore_langchain(resultats)
+retriever = creer_retriever(vectorstore)
+rag = construire_chaine_rag(retriever, llm)
+
+question = "Quels événements à Toulouse ce week-end ?"
+
+reponse, docs = rag(question)
+
+print("\n Réponse :\n")
+print(reponse)
+
+# similarité
+docs_scores = vectorstore.similarity_search_with_score(question, k=3)
+
+for doc, score in docs_scores:
+    print(score, doc.metadata["titre"])
+
+# Exact Match (recherche par mot-clé dans les métadonnées)
+def exact_match(reponse, attendu):
+    return int(reponse.strip().lower() == attendu.strip().lower())
+
+# score simplicité
+def score_pertinence(docs):
+    return len(docs)
