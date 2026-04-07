@@ -44,9 +44,8 @@ def test_vectorstore_contient_bons_documents():
 
     with patch("RAG.vectorstore.get_embedding", return_value=[0.1] * 1024):
         vectorstore = construire_vectorstore_langchain(RESULTATS_FAKES, None)
-
-    # Recherche simple pour vérifier que les docs sont bien là
-    results = vectorstore.similarity_search("jazz", k=1)
+        # Recherche simple pour vérifier que les docs sont bien là
+        results = vectorstore.similarity_search("jazz", k=1)
 
     assert len(results) >= 1
     assert "titre" in results[0].metadata   # la métadonnée titre est présente
@@ -59,15 +58,10 @@ def test_creer_retriever():
     # sans appeler Mistral
     with patch("RAG.vectorstore.get_embedding", return_value=[0.1] * 1024):
         vectorstore = construire_vectorstore_langchain(RESULTATS_FAKES, None)
-
-    retriever = creer_retriever(vectorstore)
+        retriever = creer_retriever(vectorstore)
+        docs = retriever.invoke("festival")
 
     # Le retriever doit exister
     assert retriever is not None
-
-    # Il doit retourner au maximum k=3 documents
-    with patch("RAG.vectorstore.get_embedding", return_value=[0.1] * 1024):
-        docs = retriever.invoke("festival")
-
     assert isinstance(docs, list)
-    assert len(docs) <= 3
+    assert len(docs) <= 3  # Il doit retourner au maximum k=3 documents
