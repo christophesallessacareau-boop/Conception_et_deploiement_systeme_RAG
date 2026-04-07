@@ -3,6 +3,7 @@
 # test du format de réponse sans appeler de LLM réel
 
 
+
 # Mock LLM pour simuler la génération de réponses
 def test_generation_mock():
     """
