@@ -36,14 +36,11 @@ def construire_vectorstore_langchain(resultats, client):
         def embed_query(self, text):
             return get_embedding(client, text)  # vrai appel Mistral
 
-    vectorstore = FAISS.from_embeddings(
-        text_embeddings=list(zip(
-            [doc.page_content for doc in documents],
-            embeddings_matrix.tolist()
-        )),
-        embedding=FakeEmbeddings(),
-        metadatas=[doc.metadata for doc in documents],
-    )
+    vectorstore = FAISS.from_texts(
+    texts=[doc.page_content for doc in documents],
+    embedding=FakeEmbeddings(),
+    metadatas=[doc.metadata for doc in documents],
+)
 
     print(f" Vectorstore prêt : {len(documents)} documents")
     return vectorstore
