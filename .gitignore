@@ -1,6 +1,11 @@
 # Environnement virtuel
-.env/
 .venv/
+venv/
+env/
+venv311
+
+# Fichiers de configuration contenant des informations sensibles
+.env
 
 # Fichiers Python
 __pycache__/
@@ -12,3 +17,8 @@ __pycache__/
 # Données volumineuses
 data/
 datasets/
+
+data_openagenda.csv
+Fiche+d'auto-évaluation+editable+-+Concevez+et+déployez+un+système+RAG.pdf
+Resume LLM avec RAG.pdf
+Template+de+rapport+technique.docx
