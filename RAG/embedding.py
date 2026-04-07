@@ -21,7 +21,7 @@ def get_embedding(client, texte, retries=5): # limitation de débit fréquent av
         try:
             response = client.embeddings.create(
                 model="mistral-embed",
-                inputs=texte
+                inputs=[texte]
             )
             return response.data[0].embedding
 
