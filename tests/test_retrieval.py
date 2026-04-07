@@ -1,5 +1,6 @@
 # test récupération des événements:
-from main import telecharger_evenements
+
+from RAG.retrieval import telecharger_evenements
 
 def test_telecharger_evenements():
     evenements = telecharger_evenements()

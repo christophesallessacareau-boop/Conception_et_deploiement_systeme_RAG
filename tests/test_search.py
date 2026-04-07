@@ -1,6 +1,7 @@
 # Test recherche
+
 import numpy as np
-from main import rechercher, construire_index_faiss
+from RAG.search import rechercher, construire_index_faiss
 
 def test_rechercher():
     resultats = [

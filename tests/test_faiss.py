@@ -1,5 +1,6 @@
 # Test index FAISS:
-from main import construire_index_faiss
+
+from RAG.faiss import construire_index_faiss
 import numpy as np
 
 def test_construire_index_faiss():

@@ -1,6 +1,7 @@
 # test embedding
+
 import numpy as np
-from main import get_embedding
+from RAG.embedding import get_embedding
 
 def test_get_embedding(mocker):
     fake_response = mocker.Mock()

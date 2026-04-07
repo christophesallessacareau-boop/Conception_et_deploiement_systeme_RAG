@@ -1,6 +1,7 @@
 # test de la fonction d'analyse exploratoire des événements
+
 import pandas as pd
-from main import analyser_evenements
+from RAG.analyse import analyser_evenements
 
 def test_analyser_evenements_filtrage():
     # Données fake
