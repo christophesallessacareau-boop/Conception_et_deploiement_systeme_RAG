@@ -1,3 +1,4 @@
+# Appels des fonctions dans l'ordre du projet RAG, affichage des résultats er gestions des variables globales
 
 import sys
 import os # acces aux variables d'environnement
@@ -34,26 +35,28 @@ print ("imports réalisés")
 
 
 # Récupération de la clé API Mistral depuis le fichier .env:
-load_dotenv()
-MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
-client = Mistral(api_key=MISTRAL_API_KEY) #
-print("Clé chargée :", MISTRAL_API_KEY is not None)
+load_dotenv() # lit lefichier .env
+MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY") # récupération de la clé dans .env
+client = Mistral(api_key=MISTRAL_API_KEY) # objet Mistral pour faire les appels à l'API
+print("Clé chargée :", MISTRAL_API_KEY is not None) # True si clé a été retrouvée
 
 
 # Pipeline principale du projet:
+## Exécute ce bloc UNIQUEMENT si on lance ce fichier directement.
 if __name__ == "__main__":
 
-    #récupération des événements depuis l'API:
+    #récupération des événements depuis l'API (appel à la fonction du module retrieval.py):
     evenements = telecharger_evenements()
 
-    # analyse exploratoire:
+    # analyse exploratoire (appel de analyse.py):
     df = analyser_evenements(evenements)
 
-    # embeddings:
+    # embeddings (pour chaque événement, découpe en chunks et génère les vecteurs):
     resultats = generer_embeddings(evenements,client)
     print(f"\nTerminé ! {len(resultats)} embeddings générés.")
 
-    # Construction de l'index FAISS
+    # Construction de l'index de recherche FAISS (appel de faiss.py):
+    ## retourne un index FAISS et les métadonnées associées à chaque vecteur (titre, ville, date, description)
     index, metadatas = construire_index_faiss(resultats)
 
     # Vérification que tout est bien indexé avec FAISS:
@@ -65,6 +68,8 @@ if __name__ == "__main__":
     # Vérification que tout est bien indexé avec les résultats (chunks):
     print("Nombre de résultats (chunks) :", len(resultats))
 
+    # FAISS et les métadonnées sont deux structures séparées alignées par position. 
+    # Si leurs tailles diffèrent, la recherche retournerait de mauvaises métadonnées pour un vecteur donné
     if index.ntotal == len(metadatas)== len(resultats):
         print(" Tous les événements sont bien indexés !")
     else:
@@ -79,7 +84,9 @@ if __name__ == "__main__":
     # Exemple de recherche réel:
     query = "concert Toulouse"
     print(f"\nRecherche pour : '{query}'")
+    # on transforme la question en vecteur:
     query_embedding = get_embedding(client, query)
+    # FAISS trouve les vecteurs les plus proches et retourne les métadonnées associées:
     results = rechercher(index, metadatas, query_embedding)
 
     for r in results:
