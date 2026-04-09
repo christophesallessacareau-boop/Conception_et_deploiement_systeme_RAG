@@ -91,6 +91,6 @@ print("\n Résultats Ragas :")
 print(result)
 
 # Seuils minimaux acceptables
-assert result["faithfulness"] [0]    > 0.5, " Fidélité trop faible"
-assert result["answer_relevancy"] [0] > 0.5, " Pertinence trop faible"
+assert all(x > 0.5 for x in result["faithfulness"]), "Fidélité trop faible"
+assert all(x > 0.5 for x in result["answer_relevancy"]), "Pertinence trop faible"
 print("\n Evaluation terminée avec succès !")
