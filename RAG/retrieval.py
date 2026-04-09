@@ -1,6 +1,6 @@
 # Récupérer les événements via l'API OpenDataSoft de Openagenda
 
-import requests
+import requests # appels requête HTTP pour récupérer les données de l'API
 from datetime import datetime, timedelta, timezone
 
 
@@ -14,22 +14,22 @@ def telecharger_evenements():
     url = "https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/evenements-publics-openagenda/records"
     params = {
         "where": f"location_region='Occitanie' AND firstdate_begin >= date'{il_y_a_un_an}'",
-        "limit": 50,           # pour 50 événements
+        "limit": 25,           # pour 25 événements
         "order_by": "firstdate_begin DESC", # trier par date décroissante
     }
  
-    print("Téléchargement des événements en cours...")
-    reponse = requests.get(url, params=params)
+    print("Téléchargement des événements en cours")
+    reponse = requests.get(url, params=params) # envoie de la requête au serveur
 
-    # afficher le statut pour détecter les erreurs silencieuses de l'API:
+    # afficher le statut pour détecter les erreurs de l'API:
     print("Statut HTTP :", reponse.status_code)
     if reponse.status_code != 200:
         print(" Erreur API :", reponse.text[:500])
-        return []
+        return [] # liste vide si erreur
     
     donnees = reponse.json()
  
-    evenements = donnees.get("results", [])
+    evenements = donnees.get("results", []) # on retourne une liste vide si pas de résultats
     print(f"{len(evenements)} événements récupérés.\n")
     return evenements
 

@@ -19,7 +19,7 @@ from RAG.vectorstore import construire_vectorstore_langchain, creer_retriever
 from RAG.rag         import construire_chaine_rag
 
 
-# ── Init ───────────────────────────────────────────────────
+# initialisation
 load_dotenv()
 MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
 
@@ -31,7 +31,7 @@ llm    = ChatMistralAI(
 )
 
 
-# ── Construction du pipeline RAG ───────────────────────────
+# Construction du pipeline RAG 
 print(" Construction du pipeline...")
 evenements  = telecharger_evenements()
 resultats   = generer_embeddings(evenements, client)
@@ -41,7 +41,7 @@ rag_chain   = construire_chaine_rag(retriever, llm)
 print(" Pipeline prêt\n")
 
 
-# ── Dataset de test ────────────────────────────────────────
+# Dataset de test 
 questions = [
     "Quels événements à Toulouse ?",
     "Que faire ce week-end en Occitanie ?",
@@ -71,7 +71,7 @@ dataset = Dataset.from_dict({
 })
 
 
-# ── Evaluation Ragas ───────────────────────────────────────
+# Evaluation Ragas
 print(" Evaluation Ragas en cours")
 
 # On configure Ragas pour utiliser Mistral
