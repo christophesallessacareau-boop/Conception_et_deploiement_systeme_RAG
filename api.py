@@ -30,7 +30,7 @@ if not ADMIN_KEY:
 client = Mistral(api_key=MISTRAL_API_KEY)
 llm    = ChatMistralAI(
     api_key=MISTRAL_API_KEY,
-    model="mistral-small-latest",   # ✅ nom corrigé
+    model="mistral-small-latest",  
     temperature=0.2
 )
 
