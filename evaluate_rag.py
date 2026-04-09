@@ -91,6 +91,6 @@ print("\n Résultats Ragas :")
 print(result)
 
 # Seuils minimaux acceptables
-assert result["faithfulness"]     > 0.5, " Fidélité trop faible"
-assert result["answer_relevancy"] > 0.5, " Pertinence trop faible"
+assert result["faithfulness"] [0]    > 0.5, " Fidélité trop faible"
+assert result["answer_relevancy"] [0] > 0.5, " Pertinence trop faible"
 print("\n Evaluation terminée avec succès !")
