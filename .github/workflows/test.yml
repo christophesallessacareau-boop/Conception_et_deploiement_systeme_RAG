@@ -1,4 +1,4 @@
-# test yml
+# test RAG avec fichier .yml pour GitHub Actions
 
 name: Tests RAG
 
@@ -17,12 +17,18 @@ jobs:
     - name: Setup Python
       uses: actions/setup-python@v4
       with:
-        python-version: 3.11
+        python-version: "3.11.9"
 
     - name: Install dependencies
-      run: |
-        pip install -r requirements.txt
-        pip install pytest
+      run: pip install -r requirements.txt
 
-    - name: Run tests
+    - name: Run unit tests        #  tests unitaires
+      env: # les clés sont injectées comme variables d'environnement
+        MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
+        ADMIN_KEY: ${{ secrets.ADMIN_KEY }}
       run: pytest tests/
+
+    - name: Run RAG evaluation    # évaluation Ragas séparée des tests unitaires
+      env: # les clés sont injectées comme variables d'environnement
+        MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
+      run: python evaluate_rag.py
