@@ -1,6 +1,4 @@
-# pas de clé API dans GitHub Actions), 
-# on ne peut pas appeler construire_vectorstore_langchain avec un vrai client Mistral
-# donc on mocke get_embedding pour éviter les appels réels à Mistral.
+# on mocke get_embedding pour éviter les appels réels à Mistral.
 # les tests vérifient que le vectorstore est construit correctement et que les métadonnées sont bien conservées.
 
 import numpy as np

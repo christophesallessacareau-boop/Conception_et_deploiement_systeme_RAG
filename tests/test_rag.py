@@ -1,6 +1,8 @@
 # Ce test simule ce qui se passe dans RAG/rag.py
-# test de la logique du pipeline RAG sans faire de vrais appels à l'API Mistral
-# test du format de réponse sans appeler de LLM réel
+# test de la logique du pipeline RAG sans faire de vrais appels à l'API Mistral (sinon cela a un coût)
+# on teste la fonction def rag_pipeline(question)
+## les docs ont remplacés par un tuple []
+## la réponse est remplacée par FakeLLM
 
 
 
