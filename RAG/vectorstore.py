@@ -28,18 +28,22 @@ def construire_vectorstore_langchain(resultats, client):
                 }
             )
         )
+    # Embeddings est la classe de base LongChain
+    # FAISS sait alors appeler la classe
+    class FakeEmbeddings(Embeddings): 
+        def embed_documents(self, texts): # liste de textes à indexer
+            return embeddings_matrix.tolist() # vecteurs déjà calculés(sinon fix: raise NotImplementedError("Déjà calculé"))
 
-    class FakeEmbeddings(Embeddings):
-        def embed_documents(self, texts):
-            return embeddings_matrix.tolist()   # vecteurs déjà calculés
-
-        def embed_query(self, text):
+        def embed_query(self, text): # question posée par l'utilisateur
             return get_embedding(client, text)  # vrai appel Mistral
 
-    vectorstore = FAISS.from_texts(
-    texts=[doc.page_content for doc in documents],
-    embedding=FakeEmbeddings(),
-    metadatas=[doc.metadata for doc in documents],
+    vectorstore = FAISS.from_embeddings(
+        text_embeddings=list(zip(
+            [doc.page_content for doc in documents], # textes
+            embeddings_matrix.tolist() #vecteurs déjà calculés
+        )),
+        embedding=FakeEmbeddings(),
+        metadatas=[doc.metadata for doc in documents],
 )
 
     print(f" Vectorstore prêt : {len(documents)} documents")
