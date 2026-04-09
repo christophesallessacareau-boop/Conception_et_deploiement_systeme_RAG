@@ -1,0 +1,11 @@
+
+services:
+  rag-api:
+    build: .                  # construit l'image depuis le Dockerfile
+    ports:
+      - "8000:8000"           # port local:port conteneur
+    env_file:
+      - .env                  # IMPORTANT : injecte les clés sans les mettre dans l'image
+    volumes:
+      - ./RAG:/app/RAG        # synchronise le code local en temps réel
+    restart: unless-stopped   # redémarre automatiquement si crash

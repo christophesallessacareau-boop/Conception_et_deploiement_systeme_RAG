@@ -1,0 +1,23 @@
+
+# Fichiers à ne PAS copier dans l'image Docker
+
+# Environnement Python local
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Variables d'environnement (les clés API ne doivent pas entrer dans l'image)
+.env
+
+# Tests (inutiles dans l'image de production)
+tests/
+evaluate_rag.py
+
+# Git
+.git/
+.gitignore
+
+# Docker lui-même
+Dockerfile
+docker-compose.yml
