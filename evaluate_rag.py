@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 from datasets import Dataset
 from ragas import evaluate
-from ragas.metrics.collections import Faithfulness, AnswerRelevancy, ContextPrecision
+from ragas.metrics import faithfulness, answer_relevancy, context_precision
 
 from ragas.llms import LangchainLLMWrapper
 from ragas.embeddings import LangchainEmbeddingsWrapper
@@ -82,14 +82,13 @@ dataset = Dataset.from_dict({
 # Evaluation 
 print(" Evaluation Ragas en cours...")
 
-# LLM injecté directement dans chaque métrique
-faithfulness_metric      = Faithfulness(llm=ragas_llm)
-answer_relevancy_metric  = AnswerRelevancy(llm=ragas_llm, embeddings=ragas_embeddings)
-context_precision_metric = ContextPrecision(llm=ragas_llm)
+# Métriques
 
 result = evaluate(
     dataset,
-    metrics=[faithfulness_metric, answer_relevancy_metric, context_precision_metric],
+    metrics=[faithfulness, answer_relevancy, context_precision],
+    llm=ragas_llm,
+    embeddings=ragas_embeddings,
 )
 
 print("\n Résultats Ragas :")
