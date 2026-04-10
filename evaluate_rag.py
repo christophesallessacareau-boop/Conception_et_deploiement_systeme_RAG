@@ -26,6 +26,9 @@ from RAG.rag         import construire_chaine_rag
 load_dotenv()
 MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
 
+# LiteLLM lit MISTRAL_API_KEY depuis les variables d'environnement
+os.environ["MISTRAL_API_KEY"] = MISTRAL_API_KEY 
+
 # Client pour le pipeline RAG
 client = MistralClient(api_key=MISTRAL_API_KEY)
 llm    = ChatMistralAI(
@@ -34,9 +37,10 @@ llm    = ChatMistralAI(
     temperature=0
 )
 
-# Config Ragas
-ragas_llm        = llm_factory("mistral-small-latest", client=client)
-ragas_embeddings = embedding_factory("mistral-embed",  client=client)
+# Config Ragas (Ragas ne supporte pas Mistral directement)
+# LiteLLM supporte Mistral et est accepté par Ragas
+ragas_llm        = llm_factory("litellm",  model="mistral/mistral-small-latest")
+ragas_embeddings = embedding_factory("litellm", model="mistral/mistral-embed")
 
 
 # Pipeline RAG
@@ -93,7 +97,7 @@ print("\n Résultats Ragas :")
 print(result)
 
 
-# ── Assertions robustes ────────────────────────────────────
+# Assertions
 def get_score(result, key):
     val = result[key]
     if isinstance(val, list):
