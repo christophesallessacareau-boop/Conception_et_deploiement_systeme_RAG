@@ -31,4 +31,5 @@ jobs:
     - name: Run RAG evaluation    # évaluation Ragas séparée des tests unitaires
       env: # les clés sont injectées comme variables d'environnement
         MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
+        PYTHONWARNINGS: "ignore::DeprecationWarning" # ignorer les avertissements de dépréciation
       run: python evaluate_rag.py
