@@ -82,16 +82,14 @@ dataset = Dataset.from_dict({
 # Evaluation 
 print(" Evaluation Ragas en cours...")
 
-# métriques Rags instanciées avec ()
-faithfulness_metric     = Faithfulness()
-answer_relevancy_metric = AnswerRelevancy()
-context_precision_metric = ContextPrecision()
+# LLM injecté directement dans chaque métrique
+faithfulness_metric      = Faithfulness(llm=ragas_llm)
+answer_relevancy_metric  = AnswerRelevancy(llm=ragas_llm, embeddings=ragas_embeddings)
+context_precision_metric = ContextPrecision(llm=ragas_llm)
 
 result = evaluate(
     dataset,
     metrics=[faithfulness_metric, answer_relevancy_metric, context_precision_metric],
-    llm=ragas_llm,
-    embeddings=ragas_embeddings,
 )
 
 print("\n Résultats Ragas :")
@@ -114,4 +112,4 @@ for metric_name in ["faithfulness", "answer_relevancy", "context_precision"]:
     else:
         print(f" {metric_name} = {score:.3f} — score trop faible")
 
-print("\n Evaluation terminée !")
+print("\n Evaluation terminée")
