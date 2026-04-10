@@ -39,8 +39,8 @@ llm    = ChatMistralAI(
 
 # Config Ragas (Ragas ne supporte pas Mistral directement)
 # LiteLLM supporte Mistral et est accepté par Ragas
-ragas_llm        = llm_factory("litellm",  model="mistral/mistral-small-latest")
-ragas_embeddings = embedding_factory("litellm", model="mistral/mistral-embed")
+ragas_llm        = llm_factory("mistral/mistral-small-latest")
+ragas_embeddings = embedding_factory("litellm", "mistral/mistral-embed")
 
 
 # Pipeline RAG
