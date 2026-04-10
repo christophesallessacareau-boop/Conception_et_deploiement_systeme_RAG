@@ -10,11 +10,11 @@ from ragas.metrics.collections import (
     answer_relevancy,
     context_precision,
 )
-from ragas.llms import llm_factory
-from ragas.embeddings import embedding_factory
+from ragas.llms import LangchainLLMWrapper
+from ragas.embeddings import LangchainEmbeddingsWrapper
 
 from mistralai import Mistral as MistralClient
-from langchain_mistralai import ChatMistralAI
+from langchain_mistralai import ChatMistralAI, MistralAIEmbeddings
 
 from RAG.retrieval   import telecharger_evenements
 from RAG.embedding   import generer_embeddings
@@ -26,8 +26,6 @@ from RAG.rag         import construire_chaine_rag
 load_dotenv()
 MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
 
-# LiteLLM lit MISTRAL_API_KEY depuis les variables d'environnement
-os.environ["MISTRAL_API_KEY"] = MISTRAL_API_KEY 
 
 # Client pour le pipeline RAG
 client = MistralClient(api_key=MISTRAL_API_KEY)
@@ -37,10 +35,11 @@ llm    = ChatMistralAI(
     temperature=0
 )
 
-# Config Ragas (Ragas ne supporte pas Mistral directement)
-# LiteLLM supporte Mistral et est accepté par Ragas
-ragas_llm        = llm_factory("mistral/mistral-small-latest")
-ragas_embeddings = embedding_factory("mistral/mistral-embed")
+# Config Ragas
+ragas_llm = LangchainLLMWrapper(llm)
+ragas_embeddings = LangchainEmbeddingsWrapper(
+    MistralAIEmbeddings(api_key=MISTRAL_API_KEY, model="mistral-embed")
+)
 
 
 # Pipeline RAG
