@@ -50,6 +50,22 @@ def construire_vectorstore_langchain(resultats, client):
     return vectorstore
 
 
-def creer_retriever(vectorstore):
-    """Crée un retriever LangChain qui retourne les 3 documents les plus proches."""
-    return vectorstore.as_retriever(search_kwargs={"k": 3})
+def creer_retriever(vectorstore, ville=None, k=5):
+    """Crée un retriever avec filtre optionnel sur la ville.
+    Le retriever retourne les documents les plus proches vectoriellement.
+    On indique la ville si besoin.
+    k : vecteurs les plus proches du texte de la questio.
+    k : nombre de résultats à retourner."""
+    
+    if ville:
+        retriever = vectorstore.as_retriever(
+            search_kwargs={
+                "k": k,
+                "filter": {"ville": ville}  # ← filtre LangChain/FAISS
+            }
+        )
+    else:
+        retriever = vectorstore.as_retriever(
+            search_kwargs={"k": k}
+        )
+    return retriever

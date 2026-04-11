@@ -63,22 +63,26 @@ docker run -p 8000:8000 --env-file .env rag-occitanie
 # FAST API:  
 
 ## lancer API:  
-uvicorn api:app --reload  
+### Lancement uvicorn avec port fixe
+uvicorn api:app --reload --port 8000
   
 ## health check:  
 curl http://localhost:8000/
   
-## docs Sawagger (auto-générée):  
+## docs Sawagger (auto-générés):  
 http://127.0.0.1:8000/docs  
   
 ## Test HTTP:  
 curl -X POST "http://127.0.0.1:8000/ask" \
 -H "Content-Type: application/json" \
--d '{"question": "Quels événements culturels à Toulouse ?"}'  
+-d '{"question": "Quels événements culturels à Toulouse et Toulouse UNIQUEMENT en 2026 ?"}'  
   
- ## Rebuild (avec la clé ADMIN):  
- curl -X POST "http://127.0.0.1:8000/rebuild" \  
--H "x-api-key: ADMIN_KEY"  
+ ## Rebuild (avec la clé ADMIN à renseigner manuellement):  
+ curl -X POST http://127.0.0.1:8000/admin/rebuild \
+     -H "X-ADMIN-Key: ADMIN_KEY"  
+## ou bien Rebuild (avec clé ADMIN automatique):  
+python admin_tools.py
+
   
     
       

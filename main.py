@@ -82,7 +82,7 @@ if __name__ == "__main__":
 
 
     # Exemple de recherche réel:
-    query = "concert Toulouse"
+    query = "concert dans la ville de Toulouse uniquement ce week-end"
     print(f"\nRecherche pour : '{query}'")
     # on transforme la question en vecteur:
     query_embedding = get_embedding(client, query)
@@ -107,7 +107,7 @@ if __name__ == "__main__":
 
 
     # question test:
-    question = "Quels événements à Toulouse ce week-end ?"
+    question = "Quels événements à Toulouse et uniquement à Toulouse ce week-end ?"
     reponse, docs = rag(question)
     print("\n Réponse :\n")
     print(reponse)
