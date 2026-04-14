@@ -55,7 +55,7 @@ docker compose down
 
 ## ou bien avec Docker seul:  
 ### Builder l'image  
-docker build -t rag-occitanie  
+docker build -t rag-occitanie .  
 ### Lancer le conteneur en injectant les clés depuis .env
 docker run -p 8000:8000 --env-file .env rag-occitanie      
   
