@@ -5,8 +5,8 @@ Déploiement d'un système RAG, intégrant des modèles Mistral avec LangChain
 Recherche sémantique avec FAISS pour trouver les documents  
 Génération de réponses avec modèles Mistral  
   
-# badges GitHub  
-![CI](https://github.com/christophesallessacareau-boop/Concevez_et_d-ployez_un_syst-me_RAG/blob/main/.github/workflows/test.yml)  
+  
+![CI](https://github.com/christophesallessacareau-boop/Concevez_et_d-ployez_un_syst-me_RAG/blob/main/.github/workflows/test.yml/badge.svg)  
 ![Python](https://img.shields.io/badge/python-3.11-blue)
 ![Tests](https://img.shields.io/badge/tests-pytest-green)
 ![Vector Search](https://img.shields.io/badge/vector%20search-FAISS-purple)
