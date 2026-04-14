@@ -6,7 +6,7 @@ Recherche sémantique avec FAISS pour trouver les documents
 Génération de réponses avec modèles Mistral  
   
   
-![CI](https://github.com/christophesallessacareau-boop/Concevez_et_d-ployez_un_syst-me_RAG/blob/main/action/workflows/tests.yml/badge.svg) 
+[![Tests RAG](https://github.com/christophesallessacareau-boop/Concevez_et_d-ployez_un_syst-me_RAG/actions/workflows/test.yml/badge.svg)](https://github.com/christophesallessacareau-boop/Concevez_et_d-ployez_un_syst-me_RAG/actions/workflows/test.yml)
 ![Python](https://img.shields.io/badge/python-3.11-blue)
 ![Tests](https://img.shields.io/badge/tests-pytest-green)
 ![Vector Search](https://img.shields.io/badge/vector%20search-FAISS-purple)
