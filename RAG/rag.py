@@ -18,6 +18,8 @@ Contexte :
 Question :
 {question}
 Réponds de manière claire et utile, en proposant des événements pertinents.
+Si tu ne trouves pas d'événements pertinents, réponds que tu n'as pas d'informations à ce sujet.
+Présente ta réponse de manière structurée, avec des titres et des listes à puces si nécessaire.
 """
         # Appele le LLM
         response = llm.invoke(prompt)
