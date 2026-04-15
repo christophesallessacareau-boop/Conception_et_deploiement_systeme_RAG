@@ -29,7 +29,7 @@ client = MistralClient(api_key=MISTRAL_API_KEY)
 llm    = ChatMistralAI(
     api_key=MISTRAL_API_KEY,
     model="mistral-small-latest",
-    temperature=0
+    temperature=0 # réponse la plus précise
 )
 
 # Config Ragas

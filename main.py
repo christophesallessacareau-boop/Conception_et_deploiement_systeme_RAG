@@ -81,16 +81,17 @@ if __name__ == "__main__":
 
 
 
-    # Exemple de recherche réel:
+    # Exemple de recherche FAISS brute (sans LLM):
     query = "concert dans la ville de Toulouse uniquement ce week-end"
-    print(f"\nRecherche pour : '{query}'")
+    print(f"\nRecherche brute FAISS sans LLM pour : '{query}'")
     # on transforme la question en vecteur:
     query_embedding = get_embedding(client, query)
-    # FAISS trouve les vecteurs les plus proches et retourne les métadonnées associées:
+    # FAISS trouve les vecteurs les plus proches et retourne les métadonnées brutes associées:
     results = rechercher(index, metadatas, query_embedding)
 
     for r in results:
         print(r["titre"], "-", r["ville"])
+
 
     # Vectorstore LangChain:
     vectorstore = construire_vectorstore_langchain(resultats,client)
@@ -106,10 +107,10 @@ if __name__ == "__main__":
     rag = construire_chaine_rag(retriever, llm)
 
 
-    # question test:
+    # question test augmentée (avec LLM Mistral):
     question = "Quels événements à Toulouse et uniquement à Toulouse ce week-end ?"
     reponse, docs = rag(question)
-    print("\n Réponse :\n")
+    print("\n Réponse RAG complète:\n")
     print(reponse)
 
 

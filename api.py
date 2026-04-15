@@ -115,7 +115,7 @@ def ask(request: QuestionRequest):
     if not request.question or request.question.strip() == "":
         raise HTTPException(status_code=400, detail="La question ne peut pas être vide")
 
-    if vectorstore is None:  # ← on vérifie vectorstore, pas rag_chain
+    if vectorstore is None:  # on vérifie vectorstore
         raise HTTPException(status_code=503, detail="Pipeline non initialisé, réessayez dans quelques secondes")
 
     # Détection de ville 
@@ -131,7 +131,7 @@ def ask(request: QuestionRequest):
 
     # Réponse 
     try:
-        response, docs = rag_chain_local(request.question)  # ← rag_chain_local
+        response, docs = rag_chain_local(request.question)  # rag_chain_local
         return {
             "question": request.question,
             "answer":   response,
@@ -139,7 +139,7 @@ def ask(request: QuestionRequest):
                 {
                     "titre": d.metadata.get("titre"),
                     "ville": d.metadata.get("ville"),
-                    "date":  d.metadata.get("date_debut"),  # ← corrigé
+                    "date":  d.metadata.get("date_debut"),
                 }
                 for d in docs
             ]

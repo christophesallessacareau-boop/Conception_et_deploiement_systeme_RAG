@@ -1,11 +1,4 @@
-# Objectif:  
-Déploiement d'un système RAG, intégrant des modèles Mistral avec LangChain  
-  
-# Fonctionnalités:  
-Recherche sémantique avec FAISS pour trouver les documents  
-Génération de réponses avec modèles Mistral  
-  
-  
+
 [![Tests RAG](https://github.com/christophesallessacareau-boop/Concevez_et_d-ployez_un_syst-me_RAG/actions/workflows/test.yml/badge.svg)](https://github.com/christophesallessacareau-boop/Concevez_et_d-ployez_un_syst-me_RAG/actions/workflows/test.yml)
 ![Python](https://img.shields.io/badge/python-3.11-blue)
 ![Tests](https://img.shields.io/badge/tests-pytest-green)
@@ -15,10 +8,18 @@ Génération de réponses avec modèles Mistral
 ![API](https://img.shields.io/badge/API-FastAPI-009688)
 ![Docker](https://img.shields.io/badge/docker-ready-blue)  
   
-
+  
+# Objectif:  
+Déploiement d'un système RAG, intégrant des modèles Mistral avec LangChain  
+  
+# Fonctionnalités:  
+Recherche sémantique avec FAISS pour trouver les documents  
+Génération de réponses avec modèles Mistral  
+  
 # Prérequis  
 Python 3.11.9  
 Clé API Mistral (obtenue sur console.mistral.ai)
+Clé API FastAPI
 
 # Cloner le Repo  
 git clone https://github.com/christophesallessacareau-boop/Concevez_et_d-ployez_un_syst-me_RAG  
@@ -43,28 +44,16 @@ pip install -r requirements.txt
 ## Vider le cache pip
 pip cache purge  
 
-# N.B: pour utiliser une clé avec API Mistral:  
+# N.B: pour utiliser une clé avec API Mistral et API FastAPI:  
 pip install python-dotenv  
-dans le fichier .env ou .venv (.env A RENSEIGNER dans .gitignore):  
+dans le fichier .env (.env A RENSEIGNER dans .gitignore):  
 MISTRAL_API_KEY=noter_la_clé_ici  
+ADMIN_KEY=votre_clé_admin
   
 
 # DOCKER:  
 # Commandes pour builder et lancer:  
-## avec Docker Compose:  
-### Builder et lancer en une commande  
-
-docker compose up --build  
-
-### En arrière-plan  
-
-docker compose up --build -d  
-
-### Arrêter  
-
-docker compose down  
-
-## ou bien avec Docker seul:  
+## avec Docker seul:  
 ### Builder l'image  
 docker build -t rag-occitanie .  
 ### Lancer le conteneur en injectant les clés depuis .env
@@ -88,11 +77,23 @@ curl -X POST "http://127.0.0.1:8000/ask" \
 -H "Content-Type: application/json" \
 -d '{"question": "Quels événements culturels à Toulouse et Toulouse UNIQUEMENT en 2026 ?"}'  
   
- ## Rebuild (avec la clé ADMIN à renseigner manuellement):  
+ ## Rebuild (avec la clé ADMIN à renseigner manuellement en cliquant sur le cadenas):  
  curl -X POST http://127.0.0.1:8000/admin/rebuild \
      -H "X-ADMIN-Key: ADMIN_KEY"  
 ## ou bien Rebuild (avec clé ADMIN automatique):  
-python admin_tools.py
+python admin_tools.py  
+  
+
+# Lancer les tests unitaires:
+pystest tests/  
+  
+
+# Lancer l'evaluation Ragas:  
+python evaluate_rag.py    
+
+
+
+
 
   
     
