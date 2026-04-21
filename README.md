@@ -72,16 +72,17 @@ curl http://localhost:8000/
 ## docs Sawagger (auto-générés):  
 http://127.0.0.1:8000/docs  
   
-## Test HTTP:  
+## Test HTTP: doit retourner des événements sur Toulouse  
 curl -X POST "http://127.0.0.1:8000/ask" \
 -H "Content-Type: application/json" \
--d '{"question": "Quels événements culturels à Toulouse et Toulouse UNIQUEMENT en 2026 ?"}'  
+-d '{"question": "Quels événements culturels à Toulouse en 2026 ?"}'  
   
- ## Rebuild (avec la clé ADMIN à renseigner manuellement en cliquant sur le cadenas):  
+## autre test à effectuer avec: ne doit pas retourner d'événements:  
+"Quels événements culturels à Montpellier en 2026"  
+  
+## Rebuild (avec la clé ADMIN à renseigner manuellement en cliquant sur le cadenas):  
  curl -X POST http://127.0.0.1:8000/admin/rebuild \
      -H "X-ADMIN-Key: ADMIN_KEY"  
-## ou bien Rebuild (avec clé ADMIN automatique):  
-python admin_tools.py  
   
 
 # Lancer les tests unitaires:

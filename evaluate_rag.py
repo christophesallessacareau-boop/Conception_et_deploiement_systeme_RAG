@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 from datasets import Dataset
 from ragas import evaluate
-from ragas.metrics import faithfulness, answer_relevancy, context_precision
+from ragas.metrics import faithfulness, answer_relevancy, context_precision, context_recall
 
 from ragas.llms import LangchainLLMWrapper
 from ragas.embeddings import LangchainEmbeddingsWrapper
@@ -49,16 +49,16 @@ rag_chain   = construire_chaine_rag(retriever, llm)
 print(" Pipeline prêt\n")
 
 
-# Ragas est optimisé pour l'anglais, les métriques sont calibrées sur des réponses en anglais.
-# on traduit les questions et ground_truths en anglais
+# Ragas et ground truths
+
 questions = [
-    "What events are happening in Toulouse?",
-    "What can I do this weekend in Occitanie?",
+    "Quels événements à Toulouse ont lieu en avril 2025?",
+    "Quels événements à Toulouse ont lieu en mai 2025?",
 ]
 
 ground_truths = [
-    "There are several events in Toulouse including concerts, exhibitions and markets.",
-    "This weekend in Occitanie you can attend festivals, markets and shows.",
+    "Un dimanche, un quartier - Balade Urbaine Soupetard, L'échappée Belle / Rencontre avec Pamela Varela, Sitabaomba, Chez les zébus francophones / Rencontre avec Nantenaina Lova, Découverte des instruments de musique électronique, Walking in the movies / Rencontre avec Kim Lyang, Courts-métrages indiens, Mario Kart sur Switch, Atelier Yoga Intergénérationnel, Atelier de sophrologie spécial intergénérationnel aux Halles.",
+    "Mai à Vélo 2025, Balade à vélo à la découverte des projets co-financés par l'Union européenne à Toulouse (31), Vélos Zextraordinaires, Balade Nocturne Toulouse à Vélo, Révision vélo, Challenge Allons-Y A Vélo (AYAV), Petit-déjeuner cycliste, Initiation à la communication radio, Nuit des Musées au Musée départemental de la Résistance."
 ]
 
 answers  = []
@@ -80,13 +80,13 @@ dataset = Dataset.from_dict({
 
 
 # Evaluation 
-print(" Evaluation Ragas en cours...")
+print(" Evaluation Ragas en cours")
 
 # Métriques
 
 result = evaluate(
     dataset,
-    metrics=[faithfulness, answer_relevancy, context_precision],
+    metrics=[faithfulness, context_precision, context_recall],
     llm=ragas_llm,
     embeddings=ragas_embeddings,
 )
@@ -102,7 +102,7 @@ def get_score(result, key):
         val = val[0]
     return float(val)
 
-for metric_name in ["faithfulness", "answer_relevancy", "context_precision"]:
+for metric_name in ["faithfulness", "context_precision", "context_recall"]:
     score = get_score(result, metric_name)
     if math.isnan(score):
         print(f"  {metric_name} = nan (calcul échoué, vérifier les logs Ragas)")

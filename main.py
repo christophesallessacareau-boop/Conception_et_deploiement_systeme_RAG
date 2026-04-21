@@ -82,7 +82,7 @@ if __name__ == "__main__":
 
 
     # Exemple de recherche FAISS brute (sans LLM):
-    query = "concert dans la ville de Toulouse uniquement ce week-end"
+    query = "événements dans la ville de Toulouse en 2026"
     print(f"\nRecherche brute FAISS sans LLM pour : '{query}'")
     # on transforme la question en vecteur:
     query_embedding = get_embedding(client, query)
@@ -102,22 +102,22 @@ if __name__ == "__main__":
     llm = ChatMistralAI(
         api_key=MISTRAL_API_KEY,
         model="mistral-small-latest",
-        temperature=0.3
+        temperature=0
     )
     rag = construire_chaine_rag(retriever, llm)
 
 
     # question test augmentée (avec LLM Mistral):
-    question = "Quels événements à Toulouse et uniquement à Toulouse ce week-end ?"
+    question = "Quels événements à Toulouse en 2026 ?"
     reponse, docs = rag(question)
     print("\n Réponse RAG complète:\n")
     print(reponse)
 
 
     # évaluation
-    docs_scores = vectorstore.similarity_search_with_score(question, k=3)
+    docs_scores = vectorstore.similarity_search_with_score(question, k=5)
     for doc, score in docs_scores:
-        print(score, doc.metadata["titre"])
+        print(score, doc.metadata["titre"], doc.metadata["ville"])
 
     print("Score pertinence :", score_pertinence(docs))
 

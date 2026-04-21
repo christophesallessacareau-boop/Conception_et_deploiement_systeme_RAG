@@ -78,8 +78,8 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="RAG Occitanie API",
-    description="Posez vos questions sur les événements en Occitanie",
+    title="RAG Toulouse API",
+    description="Posez vos questions sur les événements dans la ville de Toulouse",
     lifespan=lifespan
 )
 
@@ -119,7 +119,7 @@ def ask(request: QuestionRequest):
         raise HTTPException(status_code=503, detail="Pipeline non initialisé, réessayez dans quelques secondes")
 
     # Détection de ville 
-    villes_connues = ["Toulouse", "Montpellier", "Nîmes", "Carcassonne", "Perpignan"]
+    villes_connues = ["Toulouse"]
     ville_detectee = next(
         (v for v in villes_connues if v.lower() in request.question.lower()),
         None
@@ -139,7 +139,7 @@ def ask(request: QuestionRequest):
                 {
                     "titre": d.metadata.get("titre"),
                     "ville": d.metadata.get("ville"),
-                    "date":  d.metadata.get("date_debut"),
+                    "date_debut":  d.metadata.get("date_debut"),
                 }
                 for d in docs
             ]
@@ -166,6 +166,6 @@ def rebuild(_: None = Depends(verify_admin)):
 def root():
     """Vérifie que l'API est en ligne et que le pipeline est prêt."""
     return {
-        "message":  "API RAG Occitanie opérationnelle",
+        "message":  "API RAG Toulouse opérationnelle",
         "pipeline": "prêt" if rag_chain is not None else "non initialisé"
     }

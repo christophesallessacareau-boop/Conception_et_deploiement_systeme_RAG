@@ -24,18 +24,18 @@ def construire_vectorstore_langchain(resultats, client):
                 metadata={
                     "titre": r["titre"],
                     "ville": r["ville"],
-                    "date":  r["date_debut"],
+                    "date_debut":  r["date_debut"],
                 }
             )
         )
     # Embeddings est la classe de base LongChain
-    # FAISS sait alors appeler la classe
+    # FAISS sait alors appeler la classe avec 2 méthodes
     class FakeEmbeddings(Embeddings): 
         def embed_documents(self, texts): # liste de textes à indexer
-            return embeddings_matrix.tolist() # vecteurs déjà calculés(sinon fix: raise NotImplementedError("Déjà calculé"))
+            return embeddings_matrix.tolist() # vecteurs déjà calculés, on évite de les recalculer ici
 
         def embed_query(self, text): # question posée par l'utilisateur
-            return get_embedding(client, text)  # vrai appel Mistral
+            return get_embedding(client, text)  # vrai appel Mistral et retour d'un vecteur
 
     vectorstore = FAISS.from_embeddings(
         text_embeddings=list(zip(
@@ -54,14 +54,14 @@ def creer_retriever(vectorstore, ville=None, k=5):
     """Crée un retriever avec filtre optionnel sur la ville.
     Le retriever retourne les documents les plus proches vectoriellement.
     On indique la ville si besoin.
-    k : vecteurs les plus proches du texte de la questio.
+    k : vecteurs les plus proches du texte de la question.
     k : nombre de résultats à retourner."""
     
     if ville:
         retriever = vectorstore.as_retriever(
             search_kwargs={
                 "k": k,
-                "filter": {"ville": ville}  # ← filtre LangChain/FAISS
+                "filter": {"ville": ville}  # filtre par métadata "ville"
             }
         )
     else:

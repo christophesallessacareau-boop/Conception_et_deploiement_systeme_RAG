@@ -29,7 +29,7 @@ def construire_index_faiss(resultats):
         {
             "titre": r["titre"],
             "ville": r["ville"],
-            "date": r["date_debut"],
+            "date_debut": r["date_debut"],
             "description": r["description"]
         }
         for r in resultats
