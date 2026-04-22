@@ -5,8 +5,9 @@
 import os
 import requests
 from dotenv import load_dotenv
+from pathlib import Path
 
-load_dotenv()
+load_dotenv(dotenv_path=Path(__file__).parent / ".env")
 
 BASE_URL = "http://127.0.0.1:8000"  # port fixe
 ADMIN_KEY = os.getenv("ADMIN_KEY")

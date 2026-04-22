@@ -45,31 +45,46 @@ evenements  = telecharger_evenements()
 resultats   = generer_embeddings(evenements, client)
 vectorstore = construire_vectorstore_langchain(resultats, client)
 retriever   = creer_retriever(vectorstore)
+
+# pour voir tous les chunks mai 2025 pour améliorer les scores
+docs = retriever.invoke("événements Toulouse mai 2025")
+for doc in docs:
+    print(doc.metadata.get("date_debut"), "|", doc.page_content[:200])
+
 rag_chain   = construire_chaine_rag(retriever, llm)
 print(" Pipeline prêt\n")
 
 
 # Ragas et ground truths
 
+def retriever_ville(vectorstore, question, ville=None, k=5):
+    """Retriever avec ou sans filtre ville selon la question."""
+    r = creer_retriever(vectorstore, ville=ville, k=k)
+    return r.invoke(question)
+
 questions = [
-    "Quels événements à Toulouse ont lieu en avril 2025?",
     "Quels événements à Toulouse ont lieu en mai 2025?",
+    
+]
+
+villes = [
+    "Toulouse",   #  filtre sur Toulouse
+    
 ]
 
 ground_truths = [
-    "Un dimanche, un quartier - Balade Urbaine Soupetard, L'échappée Belle / Rencontre avec Pamela Varela, Sitabaomba, Chez les zébus francophones / Rencontre avec Nantenaina Lova, Découverte des instruments de musique électronique, Walking in the movies / Rencontre avec Kim Lyang, Courts-métrages indiens, Mario Kart sur Switch, Atelier Yoga Intergénérationnel, Atelier de sophrologie spécial intergénérationnel aux Halles.",
-    "Mai à Vélo 2025, Balade à vélo à la découverte des projets co-financés par l'Union européenne à Toulouse (31), Vélos Zextraordinaires, Balade Nocturne Toulouse à Vélo, Révision vélo, Challenge Allons-Y A Vélo (AYAV), Petit-déjeuner cycliste, Initiation à la communication radio, Nuit des Musées au Musée départemental de la Résistance."
+    "En mai 2025 à Toulouse : la Nuit des Musées le 17 mai aux Monuments, le Festival de l'Erotisme au Grand Marché les 17 et 18 mai, le Centenaire du Planétarium à la Cité de l'espace le 7 mai, les Journées Portes Ouvertes EPITA le 17 mai.",
+    
 ]
 
 answers  = []
 contexts = []
 
-for q in questions:
-    response, docs = rag_chain(q)
-    answers.append(response)
+for q, ville in zip(questions, villes):
+    docs = retriever_ville(vectorstore, q, ville, k=5)
     contexts.append([doc.page_content for doc in docs])
-    print(f"Q: {q}")
-    print(f"R: {response[:100]}...\n")
+    response = rag_chain.invoke(q) if hasattr(rag_chain, 'invoke') else rag_chain(q)[0]
+    answers.append(response)
 
 dataset = Dataset.from_dict({
     "question":     questions,
@@ -78,6 +93,15 @@ dataset = Dataset.from_dict({
     "ground_truth": ground_truths,
 })
 
+# vérification de ce que Ragas reçoit
+for i, (q, a, c, g) in enumerate(zip(questions, answers, contexts, ground_truths)):
+    print(f"\n=== Question {i+1} ===")
+    print(f"Q: {q}")
+    print(f"A: {a[:150]}")
+    print(f"G: {g[:150]}")
+    print(f"Contexts ({len(c)} chunks):")
+    for chunk in c:
+        print(f"  → {chunk[:100]}")
 
 # Evaluation 
 print(" Evaluation Ragas en cours")

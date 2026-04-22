@@ -12,7 +12,7 @@ def telecharger_evenements():
     tous_les_evenements = []
     offset = 0
 
-    while len(tous_les_evenements) < 200:
+    while len(tous_les_evenements) < 200: # limite à 200 événements
         params = {
             "where": f"location_city='Toulouse' AND firstdate_begin >= date'{il_y_a_un_an}'",
             "limit": 100,          # max autorisé par l'API opendatasoft
@@ -54,5 +54,14 @@ def telecharger_evenements():
     for m, count in sorted(Counter(mois).items()):
         print(f"{m} : {count} événements")
 
-    return tous_les_evenements
+    # Dédoublonnage par titre
+    vus = set()
+    evenements_uniques = []
+    for e in tous_les_evenements:
+        titre = e.get("title_fr", "").strip()
+        if titre and titre not in vus:
+            vus.add(titre)
+            evenements_uniques.append(e)
 
+    print(f"{len(evenements_uniques)} événements après dédoublonnage")
+    return evenements_uniques
