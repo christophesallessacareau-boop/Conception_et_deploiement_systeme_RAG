@@ -3,7 +3,7 @@ services:
   rag-api:
     build: .                  # construit l'image depuis le Dockerfile
     ports:
-      - "8000:8000"           # port local:port conteneur
+      - "7860:7860"           # port local:port conteneur (7860 avec HF Spaces, sinon 8000)
     env_file:
       - .env                  # IMPORTANT : injecte les clés sans les mettre dans l'image
     volumes:

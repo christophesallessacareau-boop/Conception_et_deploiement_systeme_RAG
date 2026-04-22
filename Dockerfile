@@ -19,14 +19,14 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copie du code source
-COPY api.py .
-COPY RAG/ ./RAG/
+COPY . .
 
-# Port exposé par l'API FastAPI
-EXPOSE 8000
+
+# Port exposé par l'API FastAPI (8000 pour l'API, 7860 pour l'interface HF Spaces)
+EXPOSE 7860
 
 # Commande de démarrage
-# --host 0.0.0.0 → accessible depuis l'extérieur du conteneur
-# --port 8000    → port exposé
-# --reload       → à retirer en production
-CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8000"]
+# --host 0.0.0.0 : accessible depuis l'extérieur du conteneur
+# --port 7860    : port exposé, N.B: 8000 pour l'API, 7860 pour l'interface HF Spaces
+# --reload       : à retirer pour plus de rapidité
+CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "7860"]
