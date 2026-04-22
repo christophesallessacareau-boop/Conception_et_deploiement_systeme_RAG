@@ -9,7 +9,7 @@ venv311
 
 # Fichiers Python
 __pycache__/
-*.pyc
+
 
 # Config VS Code
 .vscode/

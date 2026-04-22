@@ -4,7 +4,6 @@
 # Environnement Python local
 .venv/
 __pycache__/
-*.pyc
 *.pyo
 
 # Variables d'environnement (les clés API ne doivent pas entrer dans l'image)
