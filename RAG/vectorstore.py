@@ -59,6 +59,7 @@ def creer_retriever(vectorstore, ville=None, k=5):
     
     if ville:
         retriever = vectorstore.as_retriever(
+            search_type="similarity",
             search_kwargs={
                 "k": k,
                 "filter": {"ville": ville}  # filtre par métadata "ville"

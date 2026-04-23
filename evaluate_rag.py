@@ -58,23 +58,25 @@ print(" Pipeline prêt\n")
 # Ragas et ground truths
 
 def retriever_ville(vectorstore, question, ville=None, k=5):
-    """Retriever avec ou sans filtre ville selon la question."""
+    """Retriever avec filtre ville — retourne liste vide si ville absente du corpus."""
     r = creer_retriever(vectorstore, ville=ville, k=k)
-    return r.invoke(question)
+    docs = r.invoke(question)
+
+    # filtre post-récupération pour éviter les chunks d'autres villes
+    if ville:
+        docs = [d for d in docs if d.metadata.get("ville") == ville]
+    return docs
 
 questions = [
-    "Quels événements à Toulouse ont lieu en mai 2025?",
-    
+    "Quels événements à Toulouse ont lieu en mai 2025?"    
 ]
 
 villes = [
     "Toulouse",   #  filtre sur Toulouse
-    
 ]
 
 ground_truths = [
     "En mai 2025 à Toulouse : la Nuit des Musées le 17 mai aux Monuments, le Festival de l'Erotisme au Grand Marché les 17 et 18 mai, le Centenaire du Planétarium à la Cité de l'espace le 7 mai, les Journées Portes Ouvertes EPITA le 17 mai.",
-    
 ]
 
 answers  = []
