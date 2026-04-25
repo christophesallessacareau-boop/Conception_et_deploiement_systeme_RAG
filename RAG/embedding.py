@@ -32,7 +32,7 @@ def get_embedding(client, texte, retries=5): # limitation de débit fréquent av
             print(f" Erreur API (tentative {i+1}) :", e)
             time.sleep(2 * (i + 1))  # temporisation de plus en plus importante entre les tentatives
 
-    print(" Échec après plusieurs tentatives.")
+            print(" Échec après plusieurs tentatives.")
     return None # en cas d'échec après tous les retries, on retourne None pour éviter de planter le programme
 
 

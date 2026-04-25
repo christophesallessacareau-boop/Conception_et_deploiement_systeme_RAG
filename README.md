@@ -19,8 +19,8 @@ Génération de réponses avec modèles Mistral
 # Prérequis  
 Python 3.11.9  
 Clé API Mistral (obtenue sur console.mistral.ai)
-Clé API FastAPI
-
+Clé API FastAPI (par simplification, on peut utliser celle de Mistral déjà sécurisée avec 32 caractères)  
+  
 # Cloner le Repo  
 git clone https://github.com/christophesallessacareau-boop/Concevez_et_d-ployez_un_syst-me_RAG  
 cd Concevez_et_d-ployez_un_syst-me_RAG
@@ -35,7 +35,7 @@ Remove-Item -Recurse -Force .venv
 ## Recréer un venv vierge  
 py -3.11 -m venv .venv  
 
-## activer l'environnement  
+## activer l'environnement (sous SE Windows)  
 .venv\Scripts\Activate.ps1  
 
 ## Réinstaller depuis le requirements.txt  
@@ -69,16 +69,16 @@ uvicorn api:app --reload --port 8000
 ## health check:  
 curl http://localhost:8000/
   
-## docs Sawagger (auto-générés):  
+## docs Swagger (auto-générés):  
 http://127.0.0.1:8000/docs  
   
 ## Test HTTP: doit retourner des événements sur Toulouse  
 curl -X POST "http://127.0.0.1:8000/ask" \
 -H "Content-Type: application/json" \
--d '{"question": "Quels événements culturels à Toulouse en 2026 ?"}'  
+-d '{"question": "Quels événements culturels à Toulouse en mai 2025 ?"}'  
   
 ## autre test à effectuer avec: ne doit pas retourner d'événements:  
-"Quels événements culturels à Montpellier en 2026"  
+"Quels événements culturels à Pris en 2026"  
   
 ## Rebuild (avec la clé ADMIN à renseigner manuellement en cliquant sur le cadenas):  
  curl -X POST http://127.0.0.1:8000/admin/rebuild \

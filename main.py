@@ -82,7 +82,7 @@ if __name__ == "__main__":
 
 
     # Exemple de recherche FAISS brute (sans LLM):
-    query = "événements dans la ville de Toulouse en 2026"
+    query = "événements dans la ville de Toulouse en mai 2025"
     print(f"\nRecherche brute FAISS sans LLM pour : '{query}'")
     # on transforme la question en vecteur:
     query_embedding = get_embedding(client, query)
@@ -108,7 +108,7 @@ if __name__ == "__main__":
 
 
     # question test augmentée (avec LLM Mistral):
-    question = "Quels événements à Toulouse en 2026 ?"
+    question = "Quels événements à Toulouse en mai 2025?"
     reponse, docs = rag(question)
     print("\n Réponse RAG complète:\n")
     print(reponse)

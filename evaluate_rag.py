@@ -68,7 +68,7 @@ def retriever_ville(vectorstore, question, ville=None, k=5):
     return docs
 
 questions = [
-    "Quels événements à Toulouse ont lieu en mai 2025?"    
+    "Quels événements à Paris en juin 2026?"    
 ]
 
 villes = [
@@ -95,6 +95,7 @@ dataset = Dataset.from_dict({
     "ground_truth": ground_truths,
 })
 
+
 # vérification de ce que Ragas reçoit
 for i, (q, a, c, g) in enumerate(zip(questions, answers, contexts, ground_truths)):
     print(f"\n=== Question {i+1} ===")
@@ -104,6 +105,7 @@ for i, (q, a, c, g) in enumerate(zip(questions, answers, contexts, ground_truths
     print(f"Contexts ({len(c)} chunks):")
     for chunk in c:
         print(f"  → {chunk[:100]}")
+
 
 # Evaluation 
 print(" Evaluation Ragas en cours")

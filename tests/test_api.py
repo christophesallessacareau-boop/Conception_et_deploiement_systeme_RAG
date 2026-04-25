@@ -3,6 +3,7 @@
 # On utilise TestClient de FastAPI qui simule des appels HTTP sans vrai serveur
 
 import os
+import api
 import pytest
 from unittest.mock import patch, MagicMock
 from fastapi.testclient import TestClient
@@ -53,7 +54,6 @@ def test_ask_pipeline_non_initialise():
     """endpointPOST /ask:
     Si le pipeline n'est pas prêt, /ask doit retourner 503."""
     # On s'assure que vectorstore est None (pipeline non initialisé)
-    import api
     api.vectorstore = None
 
     response = client_test.post("/ask", json={"question": "Quels concerts à Toulouse ?"})
@@ -63,8 +63,7 @@ def test_ask_pipeline_non_initialise():
 def test_ask_pipeline_pret():
     """endpoint POST /ask:
     Avec un pipeline simulé, /ask doit retourner 200 avec answer et sources."""
-    import api
-
+    
     # On simule un vectorstore et une rag_chain fonctionnels
     api.vectorstore = MagicMock()
 
@@ -109,7 +108,6 @@ def test_rebuild_mauvaise_cle():
 def test_rebuild_bonne_cle():
     """endpointPOST /admin/rebuild:
     Avec la bonne clé admin, /admin/rebuild doit retourner 200."""
-    import api
     api.last_rebuild = 0   # reset du rate limit
 
     with patch("api.build_pipeline") as mock_build:
@@ -125,7 +123,6 @@ def test_rebuild_bonne_cle():
 def test_rebuild_rate_limit():
     """endpointPOST /admin/rebuild:
     Deux rebuilds consécutifs rapides doivent déclencher un 429."""
-    import api
     api.last_rebuild = 0   # reset
 
     with patch("api.build_pipeline"):

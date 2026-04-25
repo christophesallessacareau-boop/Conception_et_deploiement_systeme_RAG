@@ -31,6 +31,7 @@ def construire_vectorstore_langchain(resultats, client):
     # Embeddings est la classe de base LongChain
     # FAISS sait alors appeler la classe avec 2 méthodes
     class FakeEmbeddings(Embeddings): 
+        
         def embed_documents(self, texts): # liste de textes à indexer
             return embeddings_matrix.tolist() # vecteurs déjà calculés, on évite de les recalculer ici
 
@@ -44,7 +45,7 @@ def construire_vectorstore_langchain(resultats, client):
         )),
         embedding=FakeEmbeddings(),
         metadatas=[doc.metadata for doc in documents],
-)
+    )
 
     print(f" Vectorstore prêt : {len(documents)} documents")
     return vectorstore

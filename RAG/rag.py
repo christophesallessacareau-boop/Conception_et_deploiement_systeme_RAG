@@ -12,15 +12,16 @@ def construire_chaine_rag(retriever, llm):
 
         # Construit le prompt
         prompt = f"""
-Tu es un assistant spécialisé dans les événements en Occitanie.
-Contexte :
-{contexte}
-Question :
-{question}
-Réponds de manière claire et utile, en proposant des événements pertinents.
-Si tu ne trouves pas d'événements pertinents, réponds que tu n'as pas d'informations à ce sujet.
-Présente ta réponse de manière structurée, avec des titres, et en séparant les événements en allant à la ligne à chaque nouvel événement.
-"""
+            Tu es un assistant spécialisé dans les événements sur Toulouse.
+            Contexte :
+            {contexte}
+            Question :
+            {question}
+            Réponds de manière claire et utile, en proposant des événements pertinents.
+            Si tu ne trouves pas d'événements pertinents, réponds que tu n'as pas d'informations à ce sujet.
+            Si tu ne trouves pas d'événements sur la ville demandée, propose des événements sur Toulouse.
+            Présente ta réponse de manière structurée, avec des titres, et en séparant les événements en allant à la ligne à chaque nouvel événement.
+        """
         # Appele le LLM
         response = llm.invoke(prompt)
         return response.content, docs
