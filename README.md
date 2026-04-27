@@ -19,7 +19,8 @@ Génération de réponses avec modèles Mistral
 # Prérequis  
 Python 3.11.9  
 Clé API Mistral (obtenue sur console.mistral.ai)
-Clé API FastAPI (par simplification, on peut utliser celle de Mistral déjà sécurisée avec 32 caractères)  
+Clé API FastAPI (aléatoire de 256 bits) obtenue dans Power Shell par la commande:  
+python -c "import secrets; print(secrets.token_hex(32))"  
   
 # Cloner le Repo  
 git clone https://github.com/christophesallessacareau-boop/Concevez_et_d-ployez_un_syst-me_RAG  
