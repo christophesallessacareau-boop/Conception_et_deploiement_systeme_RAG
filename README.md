@@ -1,15 +1,3 @@
----
-title: RAG Toulouse API
-sdk: docker
-app_port: 7860
-base_path: /docs
-emoji: 🚀
-colorFrom: blue
-colorTo: blue
-pinned: true
-short_description: poser des questions sur des événements culturels à Toulouse
----  
-
 
 [![Tests RAG](https://github.com/christophesallessacareau-boop/Concevez_et_d-ployez_un_syst-me_RAG/actions/workflows/test.yml/badge.svg)](https://github.com/christophesallessacareau-boop/Concevez_et_d-ployez_un_syst-me_RAG/actions/workflows/test.yml)
 ![Python](https://img.shields.io/badge/python-3.11-blue)
