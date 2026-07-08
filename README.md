@@ -1,3 +1,15 @@
+---
+title: RAG Toulouse API
+sdk: docker
+app_port: 7860
+base_path: /docs
+emoji: 🚀
+colorFrom: blue
+colorTo: blue
+pinned: true
+short_description: poser des questions sur des événements culturels à Toulouse
+---  
+
 
 [![Tests RAG](https://github.com/christophesallessacareau-boop/Concevez_et_d-ployez_un_syst-me_RAG/actions/workflows/test.yml/badge.svg)](https://github.com/christophesallessacareau-boop/Concevez_et_d-ployez_un_syst-me_RAG/actions/workflows/test.yml)
 ![Python](https://img.shields.io/badge/python-3.11-blue)
@@ -72,6 +84,9 @@ curl http://localhost:8000/
   
 ## docs Swagger (auto-générés):  
 http://127.0.0.1:8000/docs  
+  
+## N.B: accès direct à l'API avec Hugging Face Spaces:  
+https://christophesalles31-concevez-et-deployez-un-systeme-rag.hf.space/docs 
   
 ## Test HTTP: doit retourner des événements sur Toulouse  
 curl -X POST "http://127.0.0.1:8000/ask" \
